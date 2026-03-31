@@ -34,4 +34,8 @@ def sanitize(raw_output: str) -> str:
 
     latex = re.sub(r'[^\x00-\x7F]+', '', latex)
 
+    # Remove hidden text (white color text or invisible phrases)
+    latex = re.sub(r'\\vfill\s*\n?\\color\{white\}[^}]*\}', '', latex)
+    latex = re.sub(r'\\color\{white\}[^}]*\}', '', latex)
+
     return latex.strip()

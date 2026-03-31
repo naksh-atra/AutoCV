@@ -49,8 +49,8 @@ def main():
     )
     parser.add_argument(
         "--output", "-o",
-        default=".",
-        help="Output directory for the PDF (default: current directory)",
+        default="CVs",
+        help="Output directory for the PDF (default: CVs)",
     )
     parser.add_argument(
         "--provider", "-p",
@@ -90,37 +90,34 @@ def main():
     print("Sanitizing output...")
 
     output_dir = Path(args.output)
-    
-    # Save raw output for debugging
-    (output_dir / "debug_raw.tex").write_text(raw_latex, encoding="utf-8")
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     clean_latex = sanitize(raw_latex)
-    
-    # Save clean output for debugging
-    (output_dir / "debug_clean.tex").write_text(clean_latex, encoding="utf-8")
-
-    if args.skip_compile:
-        output_tex = output_dir / "resume_tailored.tex"
-        output_tex.write_text(clean_latex, encoding="utf-8")
-        print(f"LaTeX saved to: {output_tex}")
-        return
 
     # Generate output filename
     if args.job_role and args.company:
         job_role_clean = args.job_role.replace(" ", "_").replace("/", "_").replace("\\", "_")
         company_clean = args.company.replace(" ", "_").replace("/", "_").replace("\\", "_")
-        output_name = f"Nakshatra_{job_role_clean}_{company_clean}.pdf"
+        output_name = f"Nakshatra_{job_role_clean}_{company_clean}"
     elif args.job_role:
         job_role_clean = args.job_role.replace(" ", "_").replace("/", "_").replace("\\", "_")
-        output_name = f"Nakshatra_{job_role_clean}.pdf"
+        output_name = f"Nakshatra_{job_role_clean}"
     elif args.company:
         company_clean = args.company.replace(" ", "_").replace("/", "_").replace("\\", "_")
-        output_name = f"Nakshatra_{company_clean}.pdf"
+        output_name = f"Nakshatra_{company_clean}"
     else:
-        output_name = "Nakshatra_Resume.pdf"
+        output_name = "Nakshatra_Resume"
+
+    # Always write .tex file
+    output_tex = output_dir / f"{output_name}.tex"
+    output_tex.write_text(clean_latex, encoding="utf-8")
+    print(f"LaTeX saved to: {output_tex}")
+
+    if args.skip_compile:
+        return
 
     print("Compiling to PDF...")
-    pdf_path = compile_to_pdf(clean_latex, output_dir, output_name=output_name)
+    pdf_path = compile_to_pdf(clean_latex, output_dir, output_name=f"{output_name}.pdf")
     print(f"PDF generated: {pdf_path}")
 
 

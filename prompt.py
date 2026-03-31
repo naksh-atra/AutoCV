@@ -9,6 +9,8 @@ CRITICAL RULES:
 - Only modify text content in: Profile Summary, Work Experience bullets, Technical Skills, Projects
 - NEVER use markdown bold (**text**) — use \\textbf{{text}} instead
 - NEVER use markdown formatting of any kind — only raw LaTeX commands
+- NEVER add hidden text at the end of the document — no white text, no hidden phrases
+- Write in a NATURAL, HUMAN voice — not robotic LLM phrasing
 
 STEP 1 — ANALYZE THE JOB DESCRIPTION:
 - What is the PRIMARY FOCUS? (building systems, validating models, research, data engineering, etc.)
@@ -37,11 +39,25 @@ STEP 4 — ALIGN SKILLS SECTION:
 - Lead each category with the JD's top tools
 - Remove irrelevant skills that distract from the JD focus
 
-STEP 5 — FINAL QUALITY CHECK:
+STEP 5 — WRITE BULLETS THAT PASS BOTH ATS AND HUMAN EYES:
+- FRONT-LOAD METRICS: Start each bullet with the most impressive metric or number
+- Example: "Reduced latency 40% by optimizing inference pipelines" NOT "Optimized inference pipelines, reducing latency by 40%"
+- Example: "92% accuracy in classification by training deep learning models" NOT "Trained deep learning models, achieving 92% accuracy"
+- Example: "200+ concurrent sessions handled by deploying scalable NLP pipelines" NOT "Deployed scalable NLP pipelines, handling 200+ concurrent sessions"
+- EVERY BULLET MUST START WITH A NUMBER OR METRIC — this is non-negotiable
+- Use ACTIVE, NATURAL verbs: "Built", "Led", "Architected", "Scaled", "Optimized"
+- AVOID robotic LLM phrasing like "Demonstrated strong analytical problem-solving skills"
+- AVOID generic statements like "Collaborated with cross-functional teams" — add specific detail
+- Include IDIOSYNCRATIC DETAILS that show unique contributions, not just tasks
+- Make each bullet sound like a real person wrote it, not a template
+
+STEP 6 — FINAL QUALITY CHECK:
 - Does the resume read as a PERFECT FIT for this specific role?
 - Would a recruiter see EXACTLY what the JD asks for in the first 5 seconds?
 - Are the most critical ATS keywords present and used in context?
 - Is the language tone consistent with the JD?
+- Do bullets front-load metrics and sound natural?
+- Is there NO hidden text at the end of the document?
 
 Return ONLY the complete LaTeX file, no markdown fences or explanations."""
 
@@ -68,6 +84,18 @@ THEN TRANSFORM:
 - Inject missing critical ATS keywords naturally
 - Restructure Technical Skills to lead with JD's priorities
 - Make every bullet answer: "Why are you perfect for THIS role?"
+
+CRITICAL FOR BULLETS:
+- FRONT-LOAD METRICS: Start each bullet with the most impressive metric or number
+- Example: "Reduced latency 40% by optimizing inference pipelines" NOT "Optimized inference pipelines, reducing latency by 40%"
+- Example: "92% accuracy in classification by training deep learning models" NOT "Trained deep learning models, achieving 92% accuracy"
+- Example: "200+ concurrent sessions handled by deploying scalable NLP pipelines" NOT "Deployed scalable NLP pipelines, handling 200+ concurrent sessions"
+- EVERY BULLET MUST START WITH A NUMBER OR METRIC — this is non-negotiable
+- Use ACTIVE, NATURAL verbs: "Built", "Led", "Architected", "Scaled", "Optimized"
+- AVOID robotic LLM phrasing like "Demonstrated strong analytical problem-solving skills"
+- AVOID generic statements like "Collaborated with cross-functional teams" — add specific detail
+- Include IDIOSYNCRATIC DETAILS that show unique contributions, not just tasks
+- Make each bullet sound like a real person wrote it, not a template
 
 RESUME (keep LaTeX structure, transform ALL content):
 
