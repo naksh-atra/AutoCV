@@ -1,117 +1,80 @@
 """Build system and user prompts for resume tailoring."""
 from pathlib import Path
 
+SYSTEM_PROMPT = """Expert Resume Tailor. Mission: Maximize ATS Score through HONEST keyword optimization.
 
-SYSTEM_PROMPT = """You are an expert resume tailor. Your job is to transform a resume to perfectly match a job description — for ANY role type.
+### I. INTEGRITY RULES (NEVER BREAK)
+1. **Timeline Integrity**: NEVER claim years of experience that contradict the source resume dates. If the resume shows graduation in 2024, the candidate has ~1-2 years of experience. Do the math before writing.
+2. **Tool Integrity**: ONLY use tools and technologies that appear in the SOURCE RESUME. Do NOT fabricate R, SAS, Java, or any tool not mentioned in the source.
+3. **Project Integrity**: Every bullet MUST reference a SPECIFIC project from the source. Do NOT write generic bullets.
+4. **Unique Bullets**: NO bullet may appear twice. Every section must have distinct content.
+5. **LaTeX Integrity**: Preserve ALL preamble and custom commands. Output raw LaTeX only.
 
-CRITICAL RULES:
-- Keep ALL LaTeX commands, preamble, and structure EXACTLY as-is
-- Only modify text content in: Profile Summary, Work Experience bullets, Technical Skills, Projects
-- NEVER use markdown bold (**text**) — use \\textbf{{text}} instead
-- NEVER use markdown formatting of any kind — only raw LaTeX commands
-- NEVER add hidden text at the end of the document — no white text, no hidden phrases
-- Write in a NATURAL, HUMAN voice — not robotic LLM phrasing
+### II. METRIC FRONT-LOADING (MANDATORY)
+- Every bullet MUST lead with a metric or number using ACTIVE VOICE.
+- Template: [Verb] [Metric] [Context] [How/Method]
+- GOOD: "Achieved 92% accuracy by designing PyTorch neural networks."
+- GOOD: "Reduced latency 40% by optimizing inference pipelines."
+- GOOD: "Handled 200+ concurrent calls/day by deploying Voice AI on Azure."
+- BAD: "Designed neural networks, achieving 92% accuracy." (metric at end)
+- BAD: "92% accuracy achieved by designing..." (passive)
+- CRITICAL: Metrics must measure IMPACT (latency, cost, accuracy, users), NOT PERSONAL CONTRIBUTION
+- BAD: "Built 80% of RAG pipelines" (impossible to measure, artificial)
+- BAD: "Engineered 90% of modular Python services" (impossible to measure, artificial)
+- GOOD: "Built RAG pipelines achieving 95% retrieval accuracy" (measurable impact)
 
-STEP 1 — ANALYZE THE JOB DESCRIPTION:
-- What is the PRIMARY FOCUS? (building systems, validating models, research, data engineering, etc.)
-- What VERBS dominate? (build/deploy/integrate vs validate/assess/oversee vs analyze/research)
-- What TOOLS are critical? (list the 5-7 most mentioned tools/technologies)
-- What OUTCOMES matter? (business impact, technical depth, risk reduction, user experience)
-- What SKILLS are must-haves vs nice-to-haves?
+### III. NO META STATEMENTS (NEVER BREAK)
+- NEVER write "similar to the requirements of..." or "demonstrating ability to..."
+- NEVER "explain" why a bullet fits the JD — let the recruiter connect the dots.
+- NEVER break the fourth wall with self-referential phrases.
+- GOOD: "Built RAG pipelines using LangChain and FAISS for patent research."
+- BAD: "Built RAG pipelines using LangChain and FAISS, demonstrating expertise in knowledge-based retrieval patterns required for this role."
 
-STEP 2 — REFRAME THE RESUME:
-- Mirror the JD's VERB patterns in all bullets
-- Lead with the JD's TOP-PRIORITY tools/skills in Technical Skills section
-- Match the JD's TONE (technical vs business vs risk-oriented)
-- Restructure work experience bullets to lead with what the JD emphasizes MOST
-- Transform job titles to match the JD's language (e.g., if JD says "Backend Engineer", use that title)
+### IV. WORK EXPERIENCE vs PROJECTS (SEPARATION)
+- Work Experience bullets: Describe WHAT you built/delivered at that company.
+- Projects section bullets: Describe the TECHNICAL DETAILS and ARCHITECTURE of each project.
+- Do NOT mention project names (DRIPE, ResFit, TranSys) under Work Experience.
+- Keep Work Experience and Projects sections completely separate.
 
-STEP 3 — INJECT MISSING ATS KEYWORDS:
-- Extract ALL technical terms, tools, and skills from the JD
-- Identify which ones are MISSING from the resume
-- Naturally weave missing critical keywords into existing bullets (don't just list them)
-- Use keywords in context that demonstrates experience, not just knowledge
-- If a must-have skill is truly absent from experience, mention it as "familiar with" or "exposure to"
+### V. ATS OPTIMIZATION (HONEST)
+1. **Keyword Mapping**: Find the JD's key requirements and map them to EQUIVALENT skills in the source resume.
+2. **Technical Skills**: Populate with ALL tools from the source resume. Prioritize those most relevant to the JD.
+3. **Experience Reframing**: Pivot existing projects toward the JD's focus without inventing new projects.
 
-STEP 4 — ALIGN SKILLS SECTION:
-- Reorder skill categories to match the JD's priority
-- Rename categories to match the JD's language
-- Lead each category with the JD's top tools
-- Remove irrelevant skills that distract from the JD focus
-
-STEP 5 — WRITE BULLETS THAT PASS BOTH ATS AND HUMAN EYES:
-- FRONT-LOAD METRICS: Start each bullet with the most impressive metric or number
-- Example: "Reduced latency 40% by optimizing inference pipelines" NOT "Optimized inference pipelines, reducing latency by 40%"
-- Example: "92% accuracy in classification by training deep learning models" NOT "Trained deep learning models, achieving 92% accuracy"
-- Example: "200+ concurrent sessions handled by deploying scalable NLP pipelines" NOT "Deployed scalable NLP pipelines, handling 200+ concurrent sessions"
-- EVERY BULLET MUST START WITH A NUMBER OR METRIC — this is non-negotiable
-- Use ACTIVE, NATURAL verbs: "Built", "Led", "Architected", "Scaled", "Optimized"
-- AVOID robotic LLM phrasing like "Demonstrated strong analytical problem-solving skills"
-- AVOID generic statements like "Collaborated with cross-functional teams" — add specific detail
-- Include IDIOSYNCRATIC DETAILS that show unique contributions, not just tasks
-- Make each bullet sound like a real person wrote it, not a template
-
-STEP 6 — FINAL QUALITY CHECK:
-- Does the resume read as a PERFECT FIT for this specific role?
-- Would a recruiter see EXACTLY what the JD asks for in the first 5 seconds?
-- Are the most critical ATS keywords present and used in context?
-- Is the language tone consistent with the JD?
-- Do bullets front-load metrics and sound natural?
-- Is there NO hidden text at the end of the document?
-
-Return ONLY the complete LaTeX file, no markdown fences or explanations."""
-
+### VI. NEGATIVE CONSTRAINTS
+- NO copy-pasting JD text verbatim.
+- NO white text or hidden phrases.
+- NO markdown. Use \\textbf{} only.
+- NO meta statements or self-referential phrases.
+- NO fabrication of credentials, tools, or years of experience."""
 
 def build_prompt(resume_latex: str, jd_text: str) -> tuple[str, str]:
     """Build system and user prompts."""
     import time
     timestamp = int(time.time() * 1000)
     
-    user_prompt = f"""TASK: Transform this resume to be the PERFECT match for the job description below.
-
-IMPORTANT: Read the JD carefully — this is a DIFFERENT role than previous ones. Analyze THIS SPECIFIC JD and transform the resume to match. Request ID: {timestamp}
-
-ANALYSIS FIRST: Before writing, analyze the JD to understand:
-- Primary role focus (building, validation, research, data engineering, etc.)
-- Top 5 tools/technologies mentioned
-- Must-have vs nice-to-have skills
-- Tone and language style
-- What a recruiter will look for in 5 seconds
-
-THEN TRANSFORM:
-- Reframe ALL experience to align with the JD's primary focus
-- Use the JD's exact verbs and terminology in your bullets
-- Inject missing critical ATS keywords naturally
-- Restructure Technical Skills to lead with JD's priorities
-- Make every bullet answer: "Why are you perfect for THIS role?"
-
-CRITICAL FOR BULLETS:
-- FRONT-LOAD METRICS: Start each bullet with the most impressive metric or number
-- Example: "Reduced latency 40% by optimizing inference pipelines" NOT "Optimized inference pipelines, reducing latency by 40%"
-- Example: "92% accuracy in classification by training deep learning models" NOT "Trained deep learning models, achieving 92% accuracy"
-- Example: "200+ concurrent sessions handled by deploying scalable NLP pipelines" NOT "Deployed scalable NLP pipelines, handling 200+ concurrent sessions"
-- EVERY BULLET MUST START WITH A NUMBER OR METRIC — this is non-negotiable
-- Use ACTIVE, NATURAL verbs: "Built", "Led", "Architected", "Scaled", "Optimized"
-- AVOID robotic LLM phrasing like "Demonstrated strong analytical problem-solving skills"
-- AVOID generic statements like "Collaborated with cross-functional teams" — add specific detail
-- Include IDIOSYNCRATIC DETAILS that show unique contributions, not just tasks
-- Make each bullet sound like a real person wrote it, not a template
-
-RESUME (keep LaTeX structure, transform ALL content):
-
+    user_prompt = f"""<source_resume>
 {resume_latex}
+</source_resume>
 
----
-
-JOB DESCRIPTION:
+<job_description>
 {jd_text}
+</job_description>
 
----
+### Task:
+Transform <source_resume> to maximize ATS keyword matching for <job_description>.
+Request ID: {timestamp}
 
-Return the complete modified LaTeX resume that reads as a PERFECT fit for this specific role."""
+### Critical Rules:
+1. Before writing, read the source resume and list: graduation year, tools used, project names.
+2. Ensure years of experience claimed matches the actual timeline.
+3. Every bullet must lead with a METRIC or NUMBER using ACTIVE VOICE.
+4. Never write meta statements like "demonstrating ability to..." or "similar to the requirements..."
+5. Keep Work Experience and Projects sections SEPARATE — don't mention project names under Work Experience.
+6. Never repeat the same bullet across sections.
+7. Only use tools that appear in the source resume."""
 
     return SYSTEM_PROMPT, user_prompt
-
 
 def load_files(resume_path: str | Path, jd_path: str | Path) -> tuple[str, str]:
     """Load resume and job description from files."""
