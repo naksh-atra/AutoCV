@@ -40,6 +40,14 @@ def sanitize(raw_output: str) -> str:
     latex = re.sub(r'\*\*([^*]+)\*\*', r'\\textbf{\1}', latex)
     latex = re.sub(r'\*([^*]+)\*', r'\\textit{\1}', latex)
 
+    # Fix common LLM LaTeX errors
+    # Fix \begin{tabularx}{\textwidth}{\textwidth}{X r} -> \begin{tabularx}{\textwidth}{X r}
+    latex = re.sub(r'\\begin\{tabularx\}\{\\textwidth\}\{\\textwidth\}', r'\\begin{tabularx}{\\textwidth}', latex)
+    # Fix \begin{tabularx}{\textwidth}{\textwidth r} -> \begin{tabularx}{\textwidth}{X r}
+    latex = re.sub(r'\\begin\{tabularx\}\{\\textwidth\}\{\\textwidth r\}', r'\\begin{tabularx}{\\textwidth}{X r}', latex)
+    # Fix \begin{tabularx}{\textwidth}{\textwidth l} -> \begin{tabularx}{\textwidth}{X l}
+    latex = re.sub(r'\\begin\{tabularx\}\{\\textwidth\}\{\\textwidth l\}', r'\\begin{tabularx}{\\textwidth}{X l}', latex)
+
     latex = re.sub(r'[^\x00-\x7F]+', '', latex)
 
     # Remove hidden text (white color text or invisible phrases)
