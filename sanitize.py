@@ -47,6 +47,9 @@ def sanitize(raw_output: str) -> str:
     latex = re.sub(r'\\begin\{tabularx\}\{\\textwidth\}\{\\textwidth r\}', r'\\begin{tabularx}{\\textwidth}{X r}', latex)
     # Fix \begin{tabularx}{\textwidth}{\textwidth l} -> \begin{tabularx}{\textwidth}{X l}
     latex = re.sub(r'\\begin\{tabularx\}\{\\textwidth\}\{\\textwidth l\}', r'\\begin{tabularx}{\\textwidth}{X l}', latex)
+    # Fix \begin{itemitem} -> \begin{itemize} (common LLM error)
+    latex = re.sub(r'\\begin\{itemitem\}', r'\\begin{itemize}', latex)
+    latex = re.sub(r'\\end\{itemitem\}', r'\\end{itemize}', latex)
 
     latex = re.sub(r'[^\x00-\x7F]+', '', latex)
 
