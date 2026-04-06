@@ -1,0 +1,140 @@
+{
+  "scoring_criteria": {
+    "ats": {
+      "threshold": 8.5,
+      "checks": {
+        "standard_headers": {
+          "weight": 0.15,
+          "required": ["WORK EXPERIENCE", "EDUCATION", "TECHNICAL SKILLS", "PROJECTS"]
+        },
+        "single_column": {
+          "weight": 0.10,
+          "forbidden_patterns": ["multicols", "multicolumn", "twocolumn"]
+        },
+        "keyword_density": {
+          "weight": 0.25,
+          "target_range": [0.02, 0.03]
+        },
+        "no_tables": {
+          "weight": 0.10,
+          "forbidden_patterns": ["\\\\begin\\{tabular", "\\\\begin\\{table", "\\\\begin\\{minipage"]
+        },
+        "no_images": {
+          "weight": 0.10,
+          "forbidden_patterns": ["\\\\includegraphics"]
+        },
+        "no_header_footer_contact": {
+          "weight": 0.05,
+          "forbidden_patterns": ["\\\\fancyhead", "\\\\fancyfoot"]
+        },
+        "timeline_consistency": {
+          "weight": 0.10,
+          "max_gap_months": 6
+        },
+        "knockout_requirements": {
+          "weight": 0.15
+        }
+      }
+    },
+    "recruiter": {
+      "threshold": 7.5,
+      "evaluation_aspects": [
+        "xyz_formula",
+        "front_loaded_metrics",
+        "white_space_strategy",
+        "ai_human_hybrid_tone",
+        "no_generic_objectives",
+        "no_unexplained_gaps",
+        "no_robotic_phrasing",
+        "no_photos"
+      ]
+    }
+  },
+  "prompt_rules": {
+    "integrity": [
+      "NEVER claim years of experience that contradict the source resume dates",
+      "ONLY use tools and technologies that appear in the SOURCE RESUME",
+      "Every bullet MUST reference a SPECIFIC project from the source",
+      "NO bullet may appear twice — every section must have distinct content",
+      "Preserve ALL LaTeX preamble and custom commands"
+    ],
+    "metrics": [
+      "Every bullet MUST lead with a metric or number using ACTIVE VOICE",
+      "Template: [Verb] [Metric] [Context] [How/Method]",
+      "Metrics must measure IMPACT (latency, cost, accuracy, users), NOT PERSONAL CONTRIBUTION",
+      "NO 'Task-counting' metrics — NEVER start with 'Built 5...', 'Deployed 3...'",
+      "Use context-appropriate metrics:",
+      "  - RAG/Retrieval: precision, recall, retrieval accuracy, F1 score",
+      "  - Conversational AI/GenAI: response relevance, reduced hallucination rates, intent recognition",
+      "  - Backend/APIs: latency, throughput, uptime, query execution time, error rate",
+      "  - CI/CD/DevOps: deployment time, build success rate, rollback frequency",
+      "  - ML Classification: accuracy, F1 score, AUC-ROC",
+      "  - Cost/Infrastructure: cost reduction, resource utilization",
+      "NEVER use 'accuracy' for everything — choose metrics that match the domain"
+    ],
+    "forbidden": [
+      "NO 'resulting in a X% increase/decrease' pattern — use 'Achieved X% by...'",
+      "NO LeetCode, HackerRank, CodeChef, or any coding platform mentions",
+      "NO meta statements: 'demonstrating ability to...', 'similar to the requirements of...'",
+      "NO over-quantification: 'Built 80% of X', 'Engineered 90% of Y'",
+      "NO experience self-sabotage: never state '1+ year' in summary — let timeline speak",
+      "NO copy-pasting JD text verbatim",
+      "NO white text or hidden phrases",
+      "NO markdown — use \\textbf{} only",
+      "NO fabrication of credentials, tools, or years of experience"
+    ],
+    "format": [
+      "Profile summary MUST be a cohesive paragraph — NEVER bullet points",
+      "Work Experience vs Projects sections MUST be completely separate",
+      "Do NOT mention project names (DRIPE, ResFit, TranSys) under Work Experience",
+      "Keep rich technical details (LangChain, FAISS, WebRTC, PyTorch) — don't strip for generic roles"
+    ]
+  },
+  "domain_specific_rules": {
+    "healthcare": {
+      "triggers": ["HIPAA", "PHI", "healthcare", "medical", "patient data", "benefits"],
+      "keywords": ["HIPAA compliance", "PHI protection", "data anonymization", "secure data handling", "encryption", "access controls", "PII protection"]
+    },
+    "finance": {
+      "triggers": ["compliance", "audit", "risk", "financial", "banking", "regulated", "model risk"],
+      "keywords": ["compliance testing", "auditability", "risk mindset", "regulatory standards", "data governance", "model validation"]
+    },
+    "voice_ai": {
+      "triggers": ["voice", "STT", "TTS", "telephony", "WebRTC", "conversational", "real-time", "calling"],
+      "keywords": ["memory management", "context handling", "session management", "streaming STT/TTS", "low-latency", "turn-taking detection", "conversational workflows"]
+    },
+    "swe": {
+      "triggers": ["data structures", "algorithms", "DSA", "software engineer"],
+      "keywords": ["DSA implementations", "algorithm optimization", "sorting", "searching", "graph algorithms"]
+    },
+    "fullstack": {
+      "triggers": ["frontend", "React", "Vue", "UI", "full-stack", "fullstack"],
+      "keywords": ["React", "Vue", "CSS/HTML", "API integration", "responsive design"]
+    }
+  },
+  "correct_dates": {
+    "research_intern": "Jan 2024 – Jul 2024",
+    "research_intern_company": "Manipal University Jaipur",
+    "software_engineer_ai": "Jan 2025 – Sep 2025",
+    "software_engineer_ai_company": "Propeller Global Ventures, Noida, India",
+    "ai_systems_engineer": "Oct 2025 – Present",
+    "ai_systems_engineer_company": "ResXiv/DnC/Freelance app developer, Remote",
+    "education": "BTech in Computer Science Engineering, 2020 – 2024",
+    "education_school": "Manipal University Jaipur",
+    "education_cgpa": "8.55/10"
+  },
+  "required_languages": ["Python", "JavaScript/TypeScript", "Rust", "SQL"],
+  "models": {
+    "resume_generation": "llama-3.3-70b-versatile",
+    "ats_scoring": "llama-3.1-8b-instant",
+    "recruiter_scoring": "llama-3.3-70b-versatile",
+    "synthesizer": "llama-3.1-8b-instant"
+  },
+  "pipeline_config": {
+    "ats_threshold": 8.5,
+    "recruiter_threshold": 7.5,
+    "max_iterations": 3,
+    "temperature_generation": 0.7,
+    "temperature_scoring": 0.3
+  }
+}
