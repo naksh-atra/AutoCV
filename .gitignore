@@ -14,11 +14,8 @@ env/
 .env
 
 # Generated outputs
-*.pdf
-*.tex
-debug_*.tex
-test_*.tex
-resume_tailored.*
+JDs/
+CVs/
 
 # LaTeX auxiliary files
 *.aux

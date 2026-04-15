@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-from llm import OllamaProvider, PerplexityProvider
+from llm import OllamaProvider, PerplexityProvider, GroqProvider
 from prompt import load_files, build_prompt
 from sanitize import sanitize
 from compile import compile_to_pdf
@@ -27,9 +27,17 @@ def get_provider(provider_name: str, args: argparse.Namespace):
         model = args.model or os.getenv("PERPLEXITY_MODEL", "sonar")
         return PerplexityProvider(api_key=api_key, model=model)
 
+    elif provider_name == "groq":
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            print("Error: GROQ_API_KEY not set in .env")
+            sys.exit(1)
+        model = args.model or os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        return GroqProvider(api_key=api_key, model=model)
+
     else:
         print(f"Unknown provider: {provider_name}")
-        print("Available providers: ollama, perplexity")
+        print("Available providers: ollama, perplexity, groq")
         sys.exit(1)
 
 
@@ -49,14 +57,14 @@ def main():
     )
     parser.add_argument(
         "--output", "-o",
-        default=".",
-        help="Output directory for the PDF (default: current directory)",
+        default="CVs",
+        help="Output directory for the PDF (default: CVs)",
     )
     parser.add_argument(
         "--provider", "-p",
-        default="ollama",
-        choices=["ollama", "perplexity"],
-        help="LLM provider to use (default: ollama)",
+        default="groq",
+        choices=["ollama", "perplexity", "groq"],
+        help="LLM provider to use (default: groq)",
     )
     parser.add_argument(
         "--model", "-m",
@@ -90,37 +98,34 @@ def main():
     print("Sanitizing output...")
 
     output_dir = Path(args.output)
-    
-    # Save raw output for debugging
-    (output_dir / "debug_raw.tex").write_text(raw_latex, encoding="utf-8")
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     clean_latex = sanitize(raw_latex)
-    
-    # Save clean output for debugging
-    (output_dir / "debug_clean.tex").write_text(clean_latex, encoding="utf-8")
-
-    if args.skip_compile:
-        output_tex = output_dir / "resume_tailored.tex"
-        output_tex.write_text(clean_latex, encoding="utf-8")
-        print(f"LaTeX saved to: {output_tex}")
-        return
 
     # Generate output filename
     if args.job_role and args.company:
         job_role_clean = args.job_role.replace(" ", "_").replace("/", "_").replace("\\", "_")
         company_clean = args.company.replace(" ", "_").replace("/", "_").replace("\\", "_")
-        output_name = f"Nakshatra_{job_role_clean}_{company_clean}.pdf"
+        output_name = f"Nakshatra_{job_role_clean}_{company_clean}"
     elif args.job_role:
         job_role_clean = args.job_role.replace(" ", "_").replace("/", "_").replace("\\", "_")
-        output_name = f"Nakshatra_{job_role_clean}.pdf"
+        output_name = f"Nakshatra_{job_role_clean}"
     elif args.company:
         company_clean = args.company.replace(" ", "_").replace("/", "_").replace("\\", "_")
-        output_name = f"Nakshatra_{company_clean}.pdf"
+        output_name = f"Nakshatra_{company_clean}"
     else:
-        output_name = "Nakshatra_Resume.pdf"
+        output_name = "Nakshatra_Resume"
+
+    # Always write .tex file
+    output_tex = output_dir / f"{output_name}.tex"
+    output_tex.write_text(clean_latex, encoding="utf-8")
+    print(f"LaTeX saved to: {output_tex}")
+
+    if args.skip_compile:
+        return
 
     print("Compiling to PDF...")
-    pdf_path = compile_to_pdf(clean_latex, output_dir, output_name=output_name)
+    pdf_path = compile_to_pdf(clean_latex, output_dir, output_name=f"{output_name}.pdf")
     print(f"PDF generated: {pdf_path}")
 
 
